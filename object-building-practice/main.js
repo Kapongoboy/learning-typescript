@@ -2,6 +2,8 @@
 // setup canvas
 var width = 480;
 var height = 640;
+let para = document.querySelector("p");
+let count = 0;
 // function to generate random number
 function random(min, max) {
     const num = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -12,14 +14,82 @@ function randomRGB() {
     return `rgb(${random(0, 255)},${random(0, 255)},${random(0, 255)})`;
 }
 // type BallsArray = [new Ball()];
-class Ball {
-    constructor(x, y, velX, velY, color, size) {
+class Shape {
+    constructor(x, y, velX, velY) {
         this.x = x;
         this.y = y;
         this.velX = velX;
         this.velY = velY;
+    }
+}
+class EvilCircle extends Shape {
+    constructor(x, y) {
+        super(x, y, 20, 20);
+        this.color = "white";
+        this.size = 10;
+        window.addEventListener("keydown", (e) => {
+            switch (e.key) {
+                case "a":
+                    this.x -= this.velX;
+                    break;
+                case "d":
+                    this.x += this.velX;
+                    break;
+                case "w":
+                    this.y -= this.velY;
+                    break;
+                case "s":
+                    this.y += this.velY;
+                    break;
+            }
+        });
+    }
+    draw() {
+        if (ctx != undefined) {
+            ctx.beginPath();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 3;
+            ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+    }
+    checkBounds() {
+        if ((this.x + this.size) >= width) {
+            this.x = -(this.velX);
+        }
+        if ((this.x - this.size) <= 0) {
+            this.x = -(this.velX);
+        }
+        if ((this.y + this.size) >= height) {
+            this.y = -(this.velY);
+        }
+        if ((this.y - this.size) <= 0) {
+            this.y = -(this.velY);
+        }
+    }
+    collisionDetect() {
+        for (const ball of balls) {
+            if (ball.exists) {
+                const dx = this.x - ball.x;
+                const dy = this.y - ball.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < this.size + ball.size) {
+                    ball.exists = false;
+                    count--;
+                    if (para != undefined) {
+                        para.textContent = count.toString();
+                    }
+                }
+            }
+        }
+    }
+}
+class Ball extends Shape {
+    constructor(x, y, velX, velY, color, size) {
+        super(x, y, velX, velY);
         this.color = color;
         this.size = size;
+        this.exists = true;
     }
     draw() {
         if (ctx != undefined) {
@@ -47,7 +117,7 @@ class Ball {
     }
     collisionDetect() {
         for (const ball of balls) {
-            if (this !== ball) {
+            if ((this !== ball) && ball.exists) {
                 const dx = this.x - ball.x;
                 const dy = this.y - ball.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -65,6 +135,7 @@ if (canvas != undefined) {
     height = canvas.height = window.innerHeight;
 }
 const balls = [];
+const evilBall = new EvilCircle(random(0, width), random(0, height));
 while (balls.length < 25) {
     const size = random(10, 20);
     const ball = new Ball(
@@ -72,6 +143,10 @@ while (balls.length < 25) {
     // away from the edge of the canvas, to avoid drawing errors
     random(0 + size, width - size), random(0 + size, height - size), random(-7, 7), random(-7, 7), randomRGB(), size);
     balls.push(ball);
+    count += 1;
+    if (para != undefined) {
+        para.textContent = count.toString();
+    }
 }
 function loop() {
     if (ctx != undefined) {
@@ -79,10 +154,15 @@ function loop() {
         ctx.fillRect(0, 0, width, height);
     }
     for (const ball of balls) {
-        ball.draw();
-        ball.update();
-        ball.collisionDetect();
+        if (ball.exists) {
+            ball.draw();
+            ball.update();
+            ball.collisionDetect();
+        }
     }
+    evilBall.draw();
+    evilBall.checkBounds();
+    evilBall.collisionDetect();
     requestAnimationFrame(loop);
 }
 loop();
