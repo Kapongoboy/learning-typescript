@@ -7,7 +7,7 @@ import Link from 'next/link';
 const name = 'Plamedi Luis';
 export const siteTitle = 'Plamedi Luis';
 
-export default function Layout({ children, home }) {
+export default function Layout({ children, home }: {children: React.ReactNode; home?:boolean}) {
   return (
     <div className={styles.container}>
       <Head>
