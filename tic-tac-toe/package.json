@@ -9,12 +9,14 @@
     "react-scripts": "1.0.0"
   },
   "name": "wjwuw8",
-  "description": null,
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).",
   "version": "0.0.0",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  }
+  },
+  "author": "",
+  "license": "ISC"
 }
